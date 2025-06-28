@@ -183,8 +183,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
   }, [linksMin, linksMax, shouldShowLinkNumbers, setError, clearErrors]);
 
   const handleWordCountChange = (field: "min" | "max", value: string) => {
-    const numValue: number | undefined =
-      value === "" ? undefined : Number(value);
+    const numValue = value === "" ? undefined : Number(value);
     clearErrors("articleSpecification.wordCount");
     setValue(
       `articleSpecification.wordCount.${field}` as
@@ -201,8 +200,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
   };
 
   const handleLinkCountChange = (field: "min" | "max", value: string) => {
-    const numValue: number | undefined =
-      value === "" ? undefined : Number(value);
+    const numValue = value === "" ? undefined : Number(value);
     clearErrors("articleSpecification.linksToAdvertiser");
     setValue(
       `articleSpecification.linksToAdvertiser.${field}Number` as

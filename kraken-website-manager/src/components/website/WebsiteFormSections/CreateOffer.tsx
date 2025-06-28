@@ -1,13 +1,12 @@
 "use client";
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { UseFormReturn, FieldPath, FieldError } from "react-hook-form";
+import { UseFormReturn, FieldPath, FieldError, useFormState } from "react-hook-form";
 import dollarIcon from "../../../../public/add-website-icons/dollar-icon.svg";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useFormState } from "react-hook-form";
 
 interface WebsiteFormData {
   url: string;
@@ -18,68 +17,24 @@ interface WebsiteFormData {
   description: string;
   isOwner: boolean;
   offerType: "normal" | "grey-niche" | "homepage-link";
-  guestPosting: {
-    price?: number;
-    currency: string;
-  };
-  linkInsertion: {
-    price?: number;
-    currency: string;
-  };
-  cryptoPrice?: {
-    guestPosting?: number;
-    linkInsertion?: number;
-    currency?: string;
-  };
-  adultPrice?: {
-    guestPosting?: number;
-    linkInsertion?: number;
-    currency?: string;
-  };
-  gamblingPrice?: {
-    guestPosting?: number;
-    linkInsertion?: number;
-    currency?: string;
-  };
-  cryptoPrice2?: {
-    guestPosting?: number;
-    linkInsertion?: number;
-    currency?: string;
-  };
-  adultPrice2?: {
-    guestPosting?: number;
-    linkInsertion?: number;
-    currency?: string;
-  };
-  gamblingPrice2?: {
-    guestPosting?: number;
-    linkInsertion?: number;
-    currency?: string;
-  };
-  homepageLink?: {
-    price?: number;
-    currency?: string;
-  };
+  guestPosting: { price?: number; currency: string };
+  linkInsertion: { price?: number; currency: string };
+  cryptoPrice?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  adultPrice?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  gamblingPrice?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  cryptoPrice2?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  adultPrice2?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  gamblingPrice2?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  homepageLink?: { price?: number; currency?: string };
   offerGuidelines?: string;
   samePrice?: "yes" | "no";
   samePriceValue?: number;
   articleSpecification: {
     includeArticle: boolean;
     clientProvidesContent: boolean;
-    wordCount?: {
-      min?: number;
-      max?: number;
-    };
-    taggingPolicy:
-      | "no-tag"
-      | "advertiser-request"
-      | "always-tag"
-      | "exact-match";
-    linksToAdvertiser: {
-      noTagged: boolean;
-      minNumber?: number;
-      maxNumber?: number;
-    };
+    wordCount?: { min?: number; max?: number };
+    taggingPolicy: "no-tag" | "advertiser-request" | "always-tag" | "exact-match";
+    linksToAdvertiser: { noTagged: boolean; minNumber?: number; maxNumber?: number };
     allowDoFollow: boolean;
     linkTypes: {
       brandedLinks: boolean;
@@ -87,10 +42,7 @@ interface WebsiteFormData {
       genericLinks: boolean;
       exactMatchAnchors: boolean;
     };
-    otherLinks: {
-      allowOtherLinks: boolean;
-      description: string;
-    };
+    otherLinks: { allowOtherLinks: boolean; description: string };
     otherRules: string;
   };
 }
@@ -117,7 +69,6 @@ const PriceInput: React.FC<PriceInputProps> = ({
   className = "",
 }) => {
   const { register, control } = form;
-
   const { errors } = useFormState({ control });
 
   const handleFocus = useCallback(
@@ -136,7 +87,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
   const fieldError = name
     .split(".")
     .reduce((acc: Record<string, unknown> | undefined, key: string) => {
-      if (acc && typeof acc === 'object' && key in acc) {
+      if (acc && typeof acc === "object" && key in acc) {
         return acc[key] as Record<string, unknown> | undefined;
       }
       return undefined;
@@ -168,22 +119,17 @@ const PriceInput: React.FC<PriceInputProps> = ({
 
         <div
           className="absolute left-8 sm:left-12 top-1/2 transform -translate-y-1/2 h-8 sm:h-10 w-px pointer-events-none"
-          style={{
-            backgroundColor: disabled ? "#E5E5E5" : "#EAEAEA",
-          }}
+          style={{ backgroundColor: disabled ? "#E5E5E5" : "#EAEAEA" }}
         ></div>
+
         <input
           type="number"
-          placeholder={placeholder || ""}
+          placeholder={placeholder}
           {...register(name, {
             setValueAs: (value: string | number | null | undefined) => {
-              if (value === "" || value === null || value === undefined) {
-                return undefined;
-              }
-
-              const numValue = Number(value);
-
-              return isNaN(numValue) ? undefined : numValue;
+              if (value === "" || value === null || value === undefined) return undefined;
+              const num = Number(value);
+              return isNaN(num) ? undefined : num;
             },
             disabled,
           })}
@@ -193,11 +139,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
           style={{
             boxShadow: "none",
             color: disabled ? "#0F0C1B66" : "#0F0C1B",
-            borderColor: fieldError
-              ? "#FF4D4F"
-              : disabled
-              ? "#E5E5E5"
-              : "#EAEAEA",
+            borderColor: fieldError ? "#FF4D4F" : disabled ? "#E5E5E5" : "#EAEAEA",
             borderWidth: "1px",
             borderStyle: "solid",
           }}
@@ -206,9 +148,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
           min="0"
           step="0.01"
         />
-        {fieldError && (
-          <p className="text-xs text-red-500 mt-1">{fieldError.message}</p>
-        )}
+        {fieldError && <p className="text-xs text-red-500 mt-1">{fieldError.message}</p>}
       </div>
     </div>
   );
@@ -218,18 +158,15 @@ PriceInput.displayName = "PriceInput";
 
 const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
   const {
-    watch,
     setValue,
     formState: { errors },
   } = form;
 
-  const [activeTab, setActiveTab] = useState<
-    "normal" | "grey-niche" | "homepage-link"
-  >("normal");
+  const [activeTab, setActiveTab] = useState<"normal" | "grey-niche" | "homepage-link">("normal");
 
-  const samePrice = watch("samePrice") || "no";
-  const samePriceValue = watch("samePriceValue");
-  const offerGuidelines = watch("offerGuidelines") || "";
+  const samePrice = form.watch("samePrice") || "no";
+  const samePriceValue = form.watch("samePriceValue");
+  const offerGuidelines = form.watch("offerGuidelines") || "";
 
   useEffect(() => {
     setValue("offerType", activeTab);
@@ -239,66 +176,58 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
     (checked: boolean) => {
       const newValue = checked ? "yes" : "no";
       setValue("samePrice", newValue);
-      if (newValue === "no") {
-        setValue("samePriceValue", undefined);
-      }
+      if (newValue === "no") setValue("samePriceValue", undefined);
     },
     [setValue]
   );
 
   const handleSamePriceValueChange = useCallback(
     (value: string) => {
-      const numValue = Number(value);
-      const validValue = value === "" || isNaN(numValue) ? undefined : numValue;
-      setValue("samePriceValue", validValue);
+      const num = Number(value);
+      const valid = value === "" || isNaN(num) ? undefined : num;
+      setValue("samePriceValue", valid);
 
-      if (samePrice === "yes" && validValue !== undefined && validValue >= 0) {
-        setValue("cryptoPrice.guestPosting", validValue);
-        setValue("cryptoPrice.linkInsertion", validValue);
-        setValue("adultPrice.guestPosting", validValue);
-        setValue("adultPrice.linkInsertion", validValue);
-        setValue("gamblingPrice.guestPosting", validValue);
-        setValue("gamblingPrice.linkInsertion", validValue);
-        setValue("cryptoPrice2.guestPosting", validValue);
-        setValue("cryptoPrice2.linkInsertion", validValue);
-        setValue("adultPrice2.guestPosting", validValue);
-        setValue("adultPrice2.linkInsertion", validValue);
-        setValue("gamblingPrice2.guestPosting", validValue);
-        setValue("gamblingPrice2.linkInsertion", validValue);
+      if (samePrice === "yes" && valid !== undefined && valid >= 0) {
+        const priceFields: (keyof WebsiteFormData)[] = [
+          "cryptoPrice",
+          "adultPrice",
+          "gamblingPrice",
+          "cryptoPrice2",
+          "adultPrice2",
+          "gamblingPrice2",
+        ];
+
+        priceFields.forEach((field) => {
+          setValue(`${field}.guestPosting` as FieldPath<WebsiteFormData>, valid);
+          setValue(`${field}.linkInsertion` as FieldPath<WebsiteFormData>, valid);
+        });
       }
     },
-    [setValue, samePrice]
+    [samePrice, setValue]
   );
 
   const handleOfferGuidelinesChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      setValue("offerGuidelines", value, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+      setValue("offerGuidelines", e.target.value, { shouldValidate: true, shouldDirty: true });
     },
     [setValue]
   );
 
   useEffect(() => {
-    if (
-      samePrice === "yes" &&
-      samePriceValue !== undefined &&
-      samePriceValue > 0
-    ) {
-      setValue("cryptoPrice.guestPosting", samePriceValue);
-      setValue("cryptoPrice.linkInsertion", samePriceValue);
-      setValue("adultPrice.guestPosting", samePriceValue);
-      setValue("adultPrice.linkInsertion", samePriceValue);
-      setValue("gamblingPrice.guestPosting", samePriceValue);
-      setValue("gamblingPrice.linkInsertion", samePriceValue);
-      setValue("cryptoPrice2.guestPosting", samePriceValue);
-      setValue("cryptoPrice2.linkInsertion", samePriceValue);
-      setValue("adultPrice2.guestPosting", samePriceValue);
-      setValue("adultPrice2.linkInsertion", samePriceValue);
-      setValue("gamblingPrice2.guestPosting", samePriceValue);
-      setValue("gamblingPrice2.linkInsertion", samePriceValue);
+    if (samePrice === "yes" && samePriceValue !== undefined && samePriceValue > 0) {
+      const priceFields: (keyof WebsiteFormData)[] = [
+        "cryptoPrice",
+        "adultPrice",
+        "gamblingPrice",
+        "cryptoPrice2",
+        "adultPrice2",
+        "gamblingPrice2",
+      ];
+
+      priceFields.forEach((field) => {
+        setValue(`${field}.guestPosting` as FieldPath<WebsiteFormData>, samePriceValue);
+        setValue(`${field}.linkInsertion` as FieldPath<WebsiteFormData>, samePriceValue);
+      });
     }
   }, [samePrice, samePriceValue, setValue]);
 
