@@ -15,7 +15,6 @@ interface ArticleSpecificationProps {
 
 export function ArticleSpecification({ form }: ArticleSpecificationProps) {
   const {
-    register,
     watch,
     setValue,
     setError,
@@ -492,9 +491,25 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                         "articleSpecification.linkTypes.exactMatchAnchors",
                         false
                       );
-                      if (value) {
+
+                      if (value === "brandedLinks") {
                         setValue(
-                          `articleSpecification.linkTypes.${value}` as any,
+                          "articleSpecification.linkTypes.brandedLinks",
+                          true
+                        );
+                      } else if (value === "urlNavigational") {
+                        setValue(
+                          "articleSpecification.linkTypes.urlNavigational",
+                          true
+                        );
+                      } else if (value === "genericLinks") {
+                        setValue(
+                          "articleSpecification.linkTypes.genericLinks",
+                          true
+                        );
+                      } else if (value === "exactMatchAnchors") {
+                        setValue(
+                          "articleSpecification.linkTypes.exactMatchAnchors",
                           true
                         );
                       }
@@ -598,7 +613,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                       textColor="muted"
                       htmlFor="advertiser-request"
                     >
-                      Articles are tagged only at the advertiser's request
+                      Articles are tagged only at the advertiser&apos;s request
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -609,7 +624,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                       fontSize={14}
                       htmlFor="always-tag"
                     >
-                      We always tag articles "Sponsored article"
+                      We always tag articles &ldquo;Sponsored article&rdquo;
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">

@@ -116,7 +116,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
   form,
   className = "",
 }) => {
-  const { register, watch, control } = form;
+  const { register, control } = form;
 
   const { errors } = useFormState({ control });
 
