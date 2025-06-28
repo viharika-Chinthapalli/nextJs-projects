@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, FieldPath, FieldError } from "react-hook-form";
 import dollarIcon from "../../../../public/add-website-icons/dollar-icon.svg";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -101,7 +101,7 @@ interface CreateOfferProps {
 
 interface PriceInputProps {
   label: string;
-  name: string;
+  name: FieldPath<WebsiteFormData>;
   placeholder?: string;
   disabled?: boolean;
   form: UseFormReturn<WebsiteFormData>;
@@ -120,8 +120,6 @@ const PriceInput: React.FC<PriceInputProps> = ({
 
   const { errors } = useFormState({ control });
 
-  const value = watch(name as any);
-
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       if (!disabled) {
@@ -137,7 +135,12 @@ const PriceInput: React.FC<PriceInputProps> = ({
 
   const fieldError = name
     .split(".")
-    .reduce((acc: any, key: string) => acc?.[key], errors);
+    .reduce((acc: Record<string, unknown> | undefined, key: string) => {
+      if (acc && typeof acc === 'object' && key in acc) {
+        return acc[key] as Record<string, unknown> | undefined;
+      }
+      return undefined;
+    }, errors as Record<string, unknown> | undefined) as FieldError | undefined;
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -172,8 +175,8 @@ const PriceInput: React.FC<PriceInputProps> = ({
         <input
           type="number"
           placeholder={placeholder || ""}
-          {...register(name as any, {
-            setValueAs: (value) => {
+          {...register(name, {
+            setValueAs: (value: string | number | null | undefined) => {
               if (value === "" || value === null || value === undefined) {
                 return undefined;
               }
@@ -215,7 +218,6 @@ PriceInput.displayName = "PriceInput";
 
 const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
   const {
-    register,
     watch,
     setValue,
     formState: { errors },
@@ -384,9 +386,9 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
 
   const renderGreyNicheSection = (
     title: string,
-    cryptoPricePrefix: string,
-    adultPricePrefix: string,
-    gamblingPricePrefix: string
+    cryptoPricePrefix: FieldPath<WebsiteFormData>,
+    adultPricePrefix: FieldPath<WebsiteFormData>,
+    gamblingPricePrefix: FieldPath<WebsiteFormData>
   ) => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -403,14 +405,14 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
           <div className="space-y-3 sm:space-y-4">
             <PriceInput
               label="Price for Guest Posting"
-              name={`${gamblingPricePrefix}.guestPosting`}
+              name={`${gamblingPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>}
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
             />
             <PriceInput
               label="Price for Link Insertion"
-              name={`${gamblingPricePrefix}.linkInsertion`}
+              name={`${gamblingPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>}
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
@@ -431,14 +433,14 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
           <div className="space-y-3 sm:space-y-4">
             <PriceInput
               label="Price for Guest Posting"
-              name={`${cryptoPricePrefix}.guestPosting`}
+              name={`${cryptoPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>}
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
             />
             <PriceInput
               label="Price for Link Insertion"
-              name={`${cryptoPricePrefix}.linkInsertion`}
+              name={`${cryptoPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>}
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
@@ -459,14 +461,14 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
           <div className="space-y-3 sm:space-y-4">
             <PriceInput
               label="Price for Guest Posting"
-              name={`${adultPricePrefix}.guestPosting`}
+              name={`${adultPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>}
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
             />
             <PriceInput
               label="Price for Link Insertion"
-              name={`${adultPricePrefix}.linkInsertion`}
+              name={`${adultPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>}
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
@@ -578,18 +580,18 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
               <div className="bg-white rounded-lg p-4 sm:p-6">
                 {renderGreyNicheSection(
                   "First Row",
-                  "cryptoPrice",
-                  "adultPrice",
-                  "gamblingPrice"
+                  "cryptoPrice" as FieldPath<WebsiteFormData>,
+                  "adultPrice" as FieldPath<WebsiteFormData>,
+                  "gamblingPrice" as FieldPath<WebsiteFormData>
                 )}
               </div>
 
               <div className="bg-white rounded-lg p-4 sm:p-6">
                 {renderGreyNicheSection(
                   "Second Row",
-                  "cryptoPrice2",
-                  "adultPrice2",
-                  "gamblingPrice2"
+                  "cryptoPrice2" as FieldPath<WebsiteFormData>,
+                  "adultPrice2" as FieldPath<WebsiteFormData>,
+                  "gamblingPrice2" as FieldPath<WebsiteFormData>
                 )}
               </div>
             </div>

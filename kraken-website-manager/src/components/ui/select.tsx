@@ -1,20 +1,22 @@
 import React, { memo, useState } from 'react';
 
-const Select = memo(({
-  children,
-  value,
-  onValueChange,
-  ...props
-}: {
+type SelectProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
-  value?: string;
-  onValueChange?: (value: string) => void;
-  [key: string]: any;
-}) => (
+};
+
+const Select = memo(({ children, ...props }: SelectProps) => (
   <div className="relative w-full" {...props}>
     {children}
   </div>
 ));
+
+type SelectTriggerProps = {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  isActive?: boolean;
+  error?: string;
+};
 
 const SelectTrigger = memo(({
   children,
@@ -22,13 +24,7 @@ const SelectTrigger = memo(({
   onClick,
   isActive = false,
   error,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
-  isActive?: boolean;
-  error?: string;
-}) => {
+}: SelectTriggerProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -42,28 +38,26 @@ const SelectTrigger = memo(({
           error ? 'border border-red-500' : 'border'
         } hover:bg-white ${className}`}
         style={{
-          boxShadow: isHovered 
-            ? error 
+          boxShadow: isHovered
+            ? error
               ? '0px 0px 0px 2px #EF444420'
               : '0px 0px 0px 2px #613FDD20'
-            : isActive 
-              ? error 
+            : isActive
+              ? error
                 ? '0px 1px 2px 0px #0000000D, 0px 0px 5.5px 0px #0000001A inset'
                 : '0px 1px 2px 0px #0000000D, 0px 0px 5.5px 0px #0000001A inset'
               : 'none',
-          color: "var(--color-primary-foreground)",
-          fontSize: "14px",
-          fontWeight: "500"
+          color: 'var(--color-primary-foreground)',
+          fontSize: '14px',
+          fontWeight: '500',
         }}
       >
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
+        <div className="flex-1 min-w-0">{children}</div>
         <svg
           className="w-4 h-4 ml-2 flex-shrink-0"
-          style={{ 
-            stroke: error ? '#EF4444' : '#667085', 
-            strokeWidth: '1.67px' 
+          style={{
+            stroke: error ? '#EF4444' : '#667085',
+            strokeWidth: '1.67px',
           }}
           fill="none"
           viewBox="0 0 24 24"
@@ -73,42 +67,41 @@ const SelectTrigger = memo(({
       </button>
 
       {error && (
-        <div className="text-sm text-red-500 mt-1 truncate">
-          {error}
-        </div>
+        <div className="text-sm text-red-500 mt-1 truncate">{error}</div>
       )}
     </div>
   );
 });
 
-
-const SelectValue = memo(({
-  placeholder,
-  children,
-}: {
+type SelectValueProps = {
   placeholder?: string;
   children?: React.ReactNode;
-}) => {
+};
+
+const SelectValue = memo(({ placeholder, children }: SelectValueProps) => {
   const hasValue = Boolean(children);
+
   return (
     <span
       className="truncate block text-left"
-      style={{ color: hasValue ? 'var(--color-primary-foreground)' : 'var(--color-primary-foreground)', fontSize: "14px", fontWeight: "500"}}
+      style={{
+        color: 'var(--color-primary-foreground)',
+        fontSize: '14px',
+        fontWeight: '500',
+      }}
     >
       {hasValue ? children : placeholder}
     </span>
   );
 });
 
-const SelectContent = memo(({
-  children,
-  isOpen,
-  onClose,
-}: {
+type SelectContentProps = {
   children: React.ReactNode;
   isOpen: boolean;
   onClose?: () => void;
-}) =>
+};
+
+const SelectContent = memo(({ children, isOpen, onClose }: SelectContentProps) =>
   isOpen ? (
     <>
       <div className="fixed inset-0 z-10" onClick={onClose} />
@@ -127,23 +120,19 @@ const SelectContent = memo(({
   ) : null
 );
 
-const SelectItem = memo(({
-  children,
-  value,
-  onClick,
-}: {
+type SelectItemProps = {
   children: React.ReactNode;
   value: string;
   onClick: (value: string) => void;
-}) => (
+};
+
+const SelectItem = memo(({ children, value, onClick }: SelectItemProps) => (
   <div
     onClick={() => onClick(value)}
     className="px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm transition-colors min-h-[40px] flex items-center"
     style={{ color: 'text-primary' }}
   >
-    <div className="w-full min-w-0">
-      {children}
-    </div>
+    <div className="w-full min-w-0">{children}</div>
   </div>
 ));
 
@@ -153,4 +142,4 @@ SelectValue.displayName = 'SelectValue';
 SelectContent.displayName = 'SelectContent';
 SelectItem.displayName = 'SelectItem';
 
-export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue };
+export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem };

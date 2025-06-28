@@ -1,32 +1,24 @@
 import React from 'react';
 
-interface TextareaProps {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   className?: string;
-  label?: string;
-  state?: string;
   errorMessage?: string;
-  filledText?: string;
   error?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onFocus?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
-  onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
-  [key: string]: any;
 }
 
-export const Textarea = ({ 
-  className = '', 
-  label = 'Description of Website',
-  state = 'default',
+export const Textarea = ({
+  className = '',
   errorMessage = 'This field is required',
-  filledText = 'We sell backlink on our website',
   error = '',
   value = '',
-  ...props 
+  onFocus,
+  onBlur,
+  ...props
 }: TextareaProps) => {
   const currentLength = value?.length || 0;
   const minLength = 150;
-  const showCharacterCount = currentLength > 0 || error;
+  const showCharacterCount = currentLength > 0 || !!error;
 
   return (
     <div className="w-full">
@@ -40,7 +32,7 @@ export const Textarea = ({
           resize-none 
           transition-all 
           duration-200
-          ${error ? 'border border-destructive' : 'border '}
+          ${error ? 'border border-destructive' : 'border'}
           ${className}
         `}
         style={{
@@ -70,22 +62,22 @@ export const Textarea = ({
             target.style.borderColor = 'border';
             target.style.boxShadow = '0px 1px 2px 0px #0000000D, 0px 0px 5.5px 0px #0000001A inset';
           }
-          props.onFocus?.(e);
+          onFocus?.(e);
         }}
         onBlur={(e) => {
           const target = e.target as HTMLTextAreaElement;
           target.style.boxShadow = 'none';
           target.style.borderColor = error ? 'destructive' : 'border';
-          props.onBlur?.(e);
+          onBlur?.(e);
         }}
         value={value}
         {...props}
       />
-      
+
       {showCharacterCount && (
         <div className="flex justify-between items-center mt-1">
           {error && (
-            <p 
+            <p
               style={{
                 color: 'var(--color-destructive)',
                 fontSize: '14px',
@@ -95,7 +87,7 @@ export const Textarea = ({
               {error}
             </p>
           )}
-          <p 
+          <p
             className={`text-sm ml-auto ${currentLength < minLength ? 'text-red-500' : 'text-gray-500'}`}
             style={{
               fontSize: '12px',
@@ -106,9 +98,9 @@ export const Textarea = ({
           </p>
         </div>
       )}
-      
+
       {error && !showCharacterCount && (
-        <p 
+        <p
           className="mt-1"
           style={{
             color: 'var(--color-destructive)',

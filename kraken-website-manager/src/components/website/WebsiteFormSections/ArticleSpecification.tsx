@@ -61,23 +61,41 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
   const shouldShowLinkNumbers = noTaggedLinks === false;
 
   const getWordCountMinError = () => {
-    return errors.articleSpecification?.wordCount?.min?.message || 
-           (errors.articleSpecification?.wordCount?.message && !wordCountMin ? "Minimum word count is required" : "");
+    return (
+      errors.articleSpecification?.wordCount?.min?.message ||
+      (errors.articleSpecification?.wordCount?.message && !wordCountMin
+        ? "Minimum word count is required"
+        : "")
+    );
   };
 
   const getWordCountMaxError = () => {
-    return errors.articleSpecification?.wordCount?.max?.message || 
-           (errors.articleSpecification?.wordCount?.message && !wordCountMax ? "Maximum word count is required" : "");
+    return (
+      errors.articleSpecification?.wordCount?.max?.message ||
+      (errors.articleSpecification?.wordCount?.message && !wordCountMax
+        ? "Maximum word count is required"
+        : "")
+    );
   };
 
   const getLinksMinError = () => {
-    return errors.articleSpecification?.linksToAdvertiser?.minNumber?.message || 
-           (errors.articleSpecification?.linksToAdvertiser?.message && linksMin === undefined ? "Minimum number of links is required" : "");
+    return (
+      errors.articleSpecification?.linksToAdvertiser?.minNumber?.message ||
+      (errors.articleSpecification?.linksToAdvertiser?.message &&
+      linksMin === undefined
+        ? "Minimum number of links is required"
+        : "")
+    );
   };
 
   const getLinksMaxError = () => {
-    return errors.articleSpecification?.linksToAdvertiser?.maxNumber?.message || 
-           (errors.articleSpecification?.linksToAdvertiser?.message && linksMax === undefined ? "Maximum number of links is required" : "");
+    return (
+      errors.articleSpecification?.linksToAdvertiser?.maxNumber?.message ||
+      (errors.articleSpecification?.linksToAdvertiser?.message &&
+      linksMax === undefined
+        ? "Maximum number of links is required"
+        : "")
+    );
   };
 
   useEffect(() => {
@@ -102,7 +120,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
         if (wordCountMax !== undefined) {
           clearErrors("articleSpecification.wordCount.max");
         }
-        
+
         if (wordCountMax <= wordCountMin) {
           setError("articleSpecification.wordCount.max", {
             type: "manual",
@@ -114,7 +132,11 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
         }
       }
     } else {
-      clearErrors(["articleSpecification.wordCount.min", "articleSpecification.wordCount.max", "articleSpecification.wordCount"]);
+      clearErrors([
+        "articleSpecification.wordCount.min",
+        "articleSpecification.wordCount.max",
+        "articleSpecification.wordCount",
+      ]);
     }
   }, [wordCountMin, wordCountMax, shouldShowWordCount, setError, clearErrors]);
 
@@ -140,11 +162,12 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
         if (linksMax !== undefined) {
           clearErrors("articleSpecification.linksToAdvertiser.maxNumber");
         }
-        
+
         if (linksMax <= linksMin) {
           setError("articleSpecification.linksToAdvertiser.maxNumber", {
             type: "manual",
-            message: "Maximum number of links must be strictly greater than minimum",
+            message:
+              "Maximum number of links must be strictly greater than minimum",
           });
         } else {
           clearErrors("articleSpecification.linksToAdvertiser.maxNumber");
@@ -155,42 +178,43 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
       clearErrors([
         "articleSpecification.linksToAdvertiser.minNumber",
         "articleSpecification.linksToAdvertiser.maxNumber",
-        "articleSpecification.linksToAdvertiser"
+        "articleSpecification.linksToAdvertiser",
       ]);
     }
   }, [linksMin, linksMax, shouldShowLinkNumbers, setError, clearErrors]);
 
   const handleWordCountChange = (field: "min" | "max", value: string) => {
-    const numValue = value === "" ? undefined : Number(value);
-    
+    const numValue: number | undefined =
+      value === "" ? undefined : Number(value);
     clearErrors("articleSpecification.wordCount");
-    
-    if (field === "min") {
-      setValue("articleSpecification.wordCount.min", numValue as any);
-    } else {
-      setValue("articleSpecification.wordCount.max", numValue as any);
-    }
-    
+    setValue(
+      `articleSpecification.wordCount.${field}` as
+        | "articleSpecification.wordCount.min"
+        | "articleSpecification.wordCount.max",
+      numValue
+    );
     setTimeout(() => {
-      trigger(["articleSpecification.wordCount.min", "articleSpecification.wordCount.max"]);
+      trigger([
+        "articleSpecification.wordCount.min",
+        "articleSpecification.wordCount.max",
+      ]);
     }, 0);
   };
 
   const handleLinkCountChange = (field: "min" | "max", value: string) => {
-    const numValue = value === "" ? undefined : Number(value);
-    
+    const numValue: number | undefined =
+      value === "" ? undefined : Number(value);
     clearErrors("articleSpecification.linksToAdvertiser");
-    
-    if (field === "min") {
-      setValue("articleSpecification.linksToAdvertiser.minNumber", numValue as any);
-    } else {
-      setValue("articleSpecification.linksToAdvertiser.maxNumber", numValue as any);
-    }
-    
+    setValue(
+      `articleSpecification.linksToAdvertiser.${field}Number` as
+        | "articleSpecification.linksToAdvertiser.minNumber"
+        | "articleSpecification.linksToAdvertiser.maxNumber",
+      numValue
+    );
     setTimeout(() => {
       trigger([
         "articleSpecification.linksToAdvertiser.minNumber",
-        "articleSpecification.linksToAdvertiser.maxNumber"
+        "articleSpecification.linksToAdvertiser.maxNumber",
       ]);
     }, 0);
   };
@@ -198,10 +222,10 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
   const handleContentProvisionChange = (value: string) => {
     const isClient = value === "client";
     setValue("articleSpecification.clientProvidesContent", isClient);
-    
+
     if (isClient) {
-      setValue("articleSpecification.wordCount.min", undefined as any);
-      setValue("articleSpecification.wordCount.max", undefined as any);
+      setValue("articleSpecification.wordCount.min", undefined);
+      setValue("articleSpecification.wordCount.max", undefined);
       clearErrors([
         "articleSpecification.wordCount.min",
         "articleSpecification.wordCount.max",
@@ -209,7 +233,10 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
       ]);
     } else {
       setTimeout(() => {
-        trigger(["articleSpecification.wordCount.min", "articleSpecification.wordCount.max"]);
+        trigger([
+          "articleSpecification.wordCount.min",
+          "articleSpecification.wordCount.max",
+        ]);
       }, 100);
     }
   };
@@ -217,10 +244,10 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
   const handleLinkTaggingChange = (value: string) => {
     const isNoTagged = value === "noTagged";
     setValue("articleSpecification.linksToAdvertiser.noTagged", isNoTagged);
-    
+
     if (isNoTagged) {
-      setValue("articleSpecification.linksToAdvertiser.minNumber", undefined as any);
-      setValue("articleSpecification.linksToAdvertiser.maxNumber", undefined as any);
+      setValue("articleSpecification.linksToAdvertiser.minNumber", undefined);
+      setValue("articleSpecification.linksToAdvertiser.maxNumber", undefined);
       clearErrors([
         "articleSpecification.linksToAdvertiser.minNumber",
         "articleSpecification.linksToAdvertiser.maxNumber",
@@ -230,7 +257,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
       setTimeout(() => {
         trigger([
           "articleSpecification.linksToAdvertiser.minNumber",
-          "articleSpecification.linksToAdvertiser.maxNumber"
+          "articleSpecification.linksToAdvertiser.maxNumber",
         ]);
       }, 100);
     }
@@ -347,7 +374,9 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                           min="1"
                           placeholder="Min*"
                           value={wordCountMin || ""}
-                          onChange={(e) => handleWordCountChange("min", e.target.value)}
+                          onChange={(e) =>
+                            handleWordCountChange("min", e.target.value)
+                          }
                           className={`border border-solid ${
                             getWordCountMinError() ? "border-red-500" : ""
                           }`}
@@ -365,7 +394,9 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                           min="1"
                           placeholder="Max*"
                           value={wordCountMax || ""}
-                          onChange={(e) => handleWordCountChange("max", e.target.value)}
+                          onChange={(e) =>
+                            handleWordCountChange("max", e.target.value)
+                          }
                           className={`border border-solid ${
                             getWordCountMaxError() ? "border-red-500" : ""
                           }`}
@@ -657,7 +688,9 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                               min="0"
                               placeholder="Min*"
                               value={linksMin || ""}
-                              onChange={(e) => handleLinkCountChange("min", e.target.value)}
+                              onChange={(e) =>
+                                handleLinkCountChange("min", e.target.value)
+                              }
                               className={`border border-solid ${
                                 getLinksMinError() ? "border-red-500" : ""
                               }`}
@@ -675,7 +708,9 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
                               min="0"
                               placeholder="Max*"
                               value={linksMax || ""}
-                              onChange={(e) => handleLinkCountChange("max", e.target.value)}
+                              onChange={(e) =>
+                                handleLinkCountChange("max", e.target.value)
+                              }
                               className={`border border-solid ${
                                 getLinksMaxError() ? "border-red-500" : ""
                               }`}

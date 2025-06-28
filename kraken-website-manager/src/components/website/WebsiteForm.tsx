@@ -1,6 +1,7 @@
 "use client";
+
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export default function WebsiteFormApp() {
       id: "precondition-1",
       title: "Accept Preconditions before you start the listing!",
       description:
-        "Before you can proceed with your listing, please make sure to review all required preconditions. Accepting these is mandatory to continue. It ensures your submission meets our platformstandards and avoids delays. Listings that don't meet these terms may be rejected. Take a moment to go through them carefully before moving ahead. Once accepted, you'll be able to start listing right away.",
+        "Before you can proceed with your listing, please make sure to review all required preconditions. Accepting these is mandatory to continue. It ensures your submission meets our platform standards and avoids delays. Listings that don't meet these terms may be rejected.",
       status: "pending",
     }),
     []
@@ -161,7 +162,7 @@ export default function WebsiteFormApp() {
 
   useEffect(() => {
     if (!isFormInitialized) return;
-    
+
     const storageKey = getStorageKey();
     const preconditionKey = `${storageKey}_precondition`;
     localStorage.setItem(preconditionKey, preconditionStep.status);
@@ -170,10 +171,9 @@ export default function WebsiteFormApp() {
   const clearFormData = useCallback(() => {
     const storageKey = getStorageKey();
     const preconditionKey = `${storageKey}_precondition`;
-    
+
     localStorage.removeItem(storageKey);
     localStorage.removeItem(preconditionKey);
-    
     localStorage.removeItem("websiteFormDraft");
   }, [getStorageKey]);
 
@@ -193,17 +193,14 @@ export default function WebsiteFormApp() {
         } else {
           addWebsite(data);
         }
-        
+
         clearFormData();
-        
         form.reset(defaultFormValues);
-        
         setPreconditionStep(initialPreconditionStep);
-        
+
         setTimeout(() => {
           router.push("/");
         }, 100);
-        
       } catch (error) {
         console.error("Submission error:", error);
       } finally {
@@ -214,14 +211,7 @@ export default function WebsiteFormApp() {
     [id, addWebsite, updateWebsite, router, preconditionStep.status, setLoading, clearFormData, form, defaultFormValues, initialPreconditionStep]
   );
 
-  useEffect(() => {
-    return () => {
-      if (!isSubmitting && !id) {
-      }
-    };
-  }, [isSubmitting, id]);
-
-  const onError = useCallback((errors: any) => {
+  const onError = useCallback((errors: FieldErrors<WebsiteFormData>) => {
     console.log("Validation errors:", errors);
     const firstErrorField = Object.keys(errors)[0];
     const element = document.querySelector(`[name="${firstErrorField}"]`);
@@ -237,7 +227,6 @@ export default function WebsiteFormApp() {
   const handleToggleExpanded = useCallback(() => {
     setIsExpanded((prev) => !prev);
   }, []);
-
 
   return (
     <Layout>
@@ -258,7 +247,13 @@ export default function WebsiteFormApp() {
                       Learn how to get best out of <br />linksera
                     </Label>
                     <ul className="space-y-3">
-                      {["How to add your website to the marketplace", "Setting pricing and niche/category filters", "Uploading sample articles or guidelines", "Editing or updating your website listing anytime", "Tips to make your listing stand out to buyers"].map((text, index) => (
+                      {[
+                        "How to add your website to the marketplace",
+                        "Setting pricing and niche/category filters",
+                        "Uploading sample articles or guidelines",
+                        "Editing or updating your website listing anytime",
+                        "Tips to make your listing stand out to buyers",
+                      ].map((text, index) => (
                         <li key={index} className="flex items-start gap-3">
                           <div className="w-[5px] h-[5px] rounded-full bg-muted mt-2 flex-shrink-0"></div>
                           <Label fontWeight={400} fontSize={14} fontFamily="inter" textColor="muted" className="text-sm">
@@ -282,7 +277,12 @@ export default function WebsiteFormApp() {
               </div>
             </Card>
 
-            <PreconditionCard step={preconditionStep} onAccept={handleAcceptPrecondition} isExpanded={isExpanded} onToggle={handleToggleExpanded} />
+            <PreconditionCard
+              step={preconditionStep}
+              onAccept={handleAcceptPrecondition}
+              isExpanded={isExpanded}
+              onToggle={handleToggleExpanded}
+            />
 
             <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
               <WebsiteDetails form={form} />

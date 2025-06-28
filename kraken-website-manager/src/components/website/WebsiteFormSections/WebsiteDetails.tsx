@@ -53,7 +53,7 @@ export function WebsiteDetails({ form }: WebsiteDetailsProps) {
   }, [setValue, getValues]);
 
   const updateField = useCallback(
-    (field: keyof WebsiteFormData, value: any) => {
+    (field: keyof WebsiteFormData, value: WebsiteFormData[keyof WebsiteFormData]) => {
       setValue(field, value, {
         shouldValidate: true,
         shouldDirty: true,
@@ -167,7 +167,7 @@ export function WebsiteDetails({ form }: WebsiteDetailsProps) {
 
             <div className="space-y-2">
               <Label fontWeight={500} fontSize={14}>
-                Website's Primary language
+                Website&apos;s Primary language
               </Label>
               <Select>
                 <SelectTrigger

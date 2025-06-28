@@ -45,6 +45,16 @@ const greyNicheLabels = [
   "Finance",
 ];
 
+// Type definitions
+interface Website {
+  id: string;
+  url: string;
+  trafficCountry: string;
+  primaryLanguage: string;
+  mainCategory: string;
+  otherCategories: string[];
+}
+
 const COLUMNS = [
   {
     key: "website",
@@ -68,7 +78,7 @@ const STYLES = {
     "bg-secondary hover:bg-[#4e32c2] text-white w-full sm:w-[228px] px-4 py-2 rounded-lg font-medium",
 } as const;
 
-const CountryFlag = React.memo(({ country }: { country: string }) => (
+const CountryFlag = React.memo<{ country: string }>(({ country }) => (
   <div className="flex items-center gap-2">
     <Image
       src={getCountryFlagUrl(country)}
@@ -83,9 +93,10 @@ const CountryFlag = React.memo(({ country }: { country: string }) => (
     </Label>
   </div>
 ));
+CountryFlag.displayName = 'CountryFlag';
 
-const GreyNichesIcons = React.memo(
-  ({ showAll = false }: { showAll?: boolean }) => (
+const GreyNichesIcons = React.memo<{ showAll?: boolean }>(
+  ({ showAll = false }) => (
     <div
       className="flex items-center gap-1"
       role="img"
@@ -109,6 +120,7 @@ const GreyNichesIcons = React.memo(
     </div>
   )
 );
+GreyNichesIcons.displayName = 'GreyNichesIcons';
 
 const AddWebsiteButton = React.memo(() => (
   <Link href="/add-website">
@@ -118,6 +130,7 @@ const AddWebsiteButton = React.memo(() => (
     </Button>
   </Link>
 ));
+AddWebsiteButton.displayName = 'AddWebsiteButton';
 
 const EmptyState = React.memo(() => (
   <div className="text-center py-8 sm:py-12 px-4">
@@ -135,6 +148,7 @@ const EmptyState = React.memo(() => (
     </div>
   </div>
 ));
+EmptyState.displayName = 'EmptyState';
 
 const getLanguageLabel = (languageCode: string) => {
   const language = LANGUAGES.find((lang) => lang.value === languageCode);
@@ -142,7 +156,7 @@ const getLanguageLabel = (languageCode: string) => {
 };
 
 const renderCellContent = (
-  website: any,
+  website: Website,
   columnKey: string,
   showAll = false
 ) => {
@@ -316,91 +330,92 @@ export function WebsiteTable() {
     return items;
   }, [pagination, handlePageChange, getVisiblePages]);
 
-  const MobileFieldRenderer = React.memo(
-    ({
-      label,
-      children,
-      className = "",
-    }: {
-      label: string;
-      children: React.ReactNode;
-      className?: string;
-    }) => (
-      <div className={className}>
-        <Label fontSize={12} fontWeight={600} textColor="muted">
-          {label}
-        </Label>
-        <div className="mt-1">{children}</div>
-      </div>
-    )
-  );
+  const MobileFieldRenderer = React.memo<{
+    label: string;
+    children: React.ReactNode;
+    className?: string;
+  }>(({
+    label,
+    children,
+    className = "",
+  }) => (
+    <div className={className}>
+      <Label fontSize={12} fontWeight={600} textColor="muted">
+        {label}
+      </Label>
+      <div className="mt-1">{children}</div>
+    </div>
+  ));
+  MobileFieldRenderer.displayName = 'MobileFieldRenderer';
 
-  const MobileCard = React.memo(
-    ({ website, index }: { website: any; index: number }) => (
-      <div
-        className={`p-4 border border-gray-200 rounded-lg cursor-pointer hover:shadow-sm transition-shadow ${getRowClassName(
-          index
-        )}`}
-        onClick={() => handleRowClick(website.id)}
-      >
-        <div className="space-y-3">
-          <MobileFieldRenderer label="Website">
-            <Label fontSize={14} fontWeight={400}>
-              {website.url}
-            </Label>
+  const MobileCard = React.memo<{
+    website: Website;
+    index: number;
+  }>(({ website, index }) => (
+    <div
+      className={`p-4 border border-gray-200 rounded-lg cursor-pointer hover:shadow-sm transition-shadow ${getRowClassName(
+        index
+      )}`}
+      onClick={() => handleRowClick(website.id)}
+    >
+      <div className="space-y-3">
+        <MobileFieldRenderer label="Website">
+          <Label fontSize={14} fontWeight={400}>
+            {website.url}
+          </Label>
+        </MobileFieldRenderer>
+
+        <div className="grid grid-cols-2 gap-4">
+          <MobileFieldRenderer label="Country">
+            <div className="flex items-center gap-2">
+              <Image
+                src={getCountryFlagUrl(website.trafficCountry)}
+                alt=""
+                width={21}
+                height={14}
+                className="object-cover"
+                role="presentation"
+              />
+              <Label fontSize={13} fontWeight={400}>
+                {website.trafficCountry}
+              </Label>
+            </div>
           </MobileFieldRenderer>
 
-          <div className="grid grid-cols-2 gap-4">
-            <MobileFieldRenderer label="Country">
-              <div className="flex items-center gap-2">
-                <Image
-                  src={getCountryFlagUrl(website.trafficCountry)}
-                  alt=""
-                  width={21}
-                  height={14}
-                  className="object-cover"
-                  role="presentation"
-                />
-                <Label fontSize={13} fontWeight={400}>
-                  {website.trafficCountry}
-                </Label>
-              </div>
-            </MobileFieldRenderer>
+          <MobileFieldRenderer label="Language">
+            <Label fontSize={13} fontWeight={400}>
+              {getLanguageLabel(website.primaryLanguage)}
+            </Label>
+          </MobileFieldRenderer>
+        </div>
 
-            <MobileFieldRenderer label="Language">
+        <MobileFieldRenderer label="Category">
+          <Label fontSize={13} fontWeight={400}>
+            {website.mainCategory}
+          </Label>
+        </MobileFieldRenderer>
+
+        {showAllColumns && (
+          <div className="space-y-3 pt-3 border-t border-gray-100">
+            <MobileFieldRenderer label="Other categories">
               <Label fontSize={13} fontWeight={400}>
-                {getLanguageLabel(website.primaryLanguage)}
+                {website.otherCategories.length > 0 ? (
+                  <>{website.otherCategories[0]}</>
+                ) : (
+                  <span className="text-sm text-gray-400">-</span>
+                )}
               </Label>
             </MobileFieldRenderer>
+
+            <MobileFieldRenderer label="Grey niches">
+              <GreyNichesIcons showAll />
+            </MobileFieldRenderer>
           </div>
-
-          <MobileFieldRenderer label="Category">
-            <Label fontSize={13} fontWeight={400}>
-              {website.mainCategory}
-            </Label>
-          </MobileFieldRenderer>
-
-          {showAllColumns && (
-            <div className="space-y-3 pt-3 border-t border-gray-100">
-              <MobileFieldRenderer label="Other categories">
-                <Label fontSize={13} fontWeight={400}>
-                  {website.otherCategories.length > 0 ? (
-                    <>{website.otherCategories[0]}</>
-                  ) : (
-                    <span className="text-sm text-gray-400">-</span>
-                  )}
-                </Label>
-              </MobileFieldRenderer>
-
-              <MobileFieldRenderer label="Grey niches">
-                <GreyNichesIcons showAll />
-              </MobileFieldRenderer>
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    )
-  );
+    </div>
+  ));
+  MobileCard.displayName = 'MobileCard';
 
   if (isNavigating) {
     return (
@@ -450,7 +465,7 @@ export function WebsiteTable() {
         </div>
 
         <div className="md:hidden space-y-4">
-          {currentWebsites.map((website: any, index: number) => (
+          {currentWebsites.map((website: Website, index: number) => (
             <MobileCard key={website.id} website={website} index={index} />
           ))}
         </div>
@@ -474,7 +489,7 @@ export function WebsiteTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentWebsites.map((website: any, index: number) => (
+              {currentWebsites.map((website: Website, index: number) => (
                 <TableRow
                   key={website.id}
                   className={getRowClassName(
