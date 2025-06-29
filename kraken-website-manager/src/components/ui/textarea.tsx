@@ -36,9 +36,9 @@ export const Textarea = ({
           ${className}
         `}
         style={{
-          fontSize: '16px',
+          fontSize: '14px',
           fontWeight: 400,
-          color: '#333333',
+          color: 'var(--color-muted)',
           fontFamily: 'inherit',
         }}
         onMouseEnter={(e) => {

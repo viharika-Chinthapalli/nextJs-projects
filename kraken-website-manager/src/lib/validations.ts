@@ -131,7 +131,7 @@ export const websiteFormSchema = z
         if (wordCount?.min === undefined || wordCount?.max === undefined) {
           return false;
         }
-        return wordCount.max >= wordCount.min;
+        return wordCount.max > wordCount.min; // Changed from >= to >
       }
       return true;
     },
@@ -147,7 +147,7 @@ export const websiteFormSchema = z
         if (linkNumbers.minNumber === undefined || linkNumbers.maxNumber === undefined) {
           return false;
         }
-        return linkNumbers.maxNumber >= linkNumbers.minNumber;
+        return linkNumbers.maxNumber > linkNumbers.minNumber; // Changed from >= to >
       }
       return true;
     },
@@ -161,13 +161,13 @@ export const websiteFormSchema = z
       if (data.articleSpecification.clientProvidesContent === false) {
         const wordCount = data.articleSpecification.wordCount;
         if (wordCount?.min !== undefined && wordCount?.max !== undefined) {
-          return wordCount.max >= wordCount.min;
+          return wordCount.max > wordCount.min; // Changed from >= to >
         }
       }
       return true;
     },
     {
-      message: "Maximum word count must be greater than or equal to minimum",
+      message: "Maximum word count must be strictly greater than minimum",
       path: ["articleSpecification", "wordCount", "max"],
     }
   )
@@ -179,14 +179,14 @@ export const websiteFormSchema = z
           linkNumbers.minNumber !== undefined &&
           linkNumbers.maxNumber !== undefined
         ) {
-          return linkNumbers.maxNumber >= linkNumbers.minNumber;
+          return linkNumbers.maxNumber > linkNumbers.minNumber; // Changed from >= to >
         }
       }
       return true;
     },
     {
       message:
-        "Maximum number of links must be greater than or equal to minimum",
+        "Maximum number of links must be strictly greater than minimum",
       path: ["articleSpecification", "linksToAdvertiser", "maxNumber"],
     }
   )

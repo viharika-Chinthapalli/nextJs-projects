@@ -25,6 +25,54 @@ interface PreconditionStep {
   status: "pending" | "accepted";
 }
 
+const STORAGE_KEYS = {
+  FORM_DATA: "websiteFormDraft",
+  PRECONDITION: "websiteFormPrecondition"
+} as const;
+
+const mergeFormData = (defaultData: WebsiteFormData, savedData: Partial<WebsiteFormData>): WebsiteFormData => {
+  const merged = { ...defaultData };
+  
+  Object.keys(savedData).forEach(key => {
+    const typedKey = key as keyof WebsiteFormData;
+    if (savedData[typedKey] !== undefined && savedData[typedKey] !== null) {
+      if (typeof defaultData[typedKey] === 'object' && !Array.isArray(defaultData[typedKey]) && defaultData[typedKey] !== null) {
+        (merged[typedKey] as any) = {
+          ...(defaultData[typedKey] as any),
+          ...(savedData[typedKey] as any)
+        };
+      } else {
+        (merged[typedKey] as any) = savedData[typedKey];
+      }
+    }
+  });
+
+  const priceObjects = [
+    'guestPosting', 'linkInsertion', 'homepageLink',
+    'cryptoPrice', 'adultPrice', 'gamblingPrice', 
+    'cryptoPrice2', 'adultPrice2', 'gamblingPrice2'
+  ] as const;
+
+  priceObjects.forEach(priceKey => {
+    if (savedData[priceKey]) {
+      merged[priceKey] = {
+        ...(defaultData[priceKey] as any),
+        ...(savedData[priceKey] as any)
+      };
+    }
+  });
+
+  return merged;
+};
+
+const cleanFormDataForStorage = (data: any): any => {
+  return JSON.parse(JSON.stringify(data, (key, value) => {
+    if (typeof value === 'function') return undefined;
+    if (value === undefined) return null;
+    return value;
+  }));
+};
+
 export default function WebsiteFormApp() {
   const router = useRouter();
   const { id } = useParams();
@@ -36,8 +84,7 @@ export default function WebsiteFormApp() {
     () => ({
       id: "precondition-1",
       title: "Accept Preconditions before you start the listing!",
-      description:
-        "Before you can proceed with your listing, please make sure to review all required preconditions. Accepting these is mandatory to continue. It ensures your submission meets our platform standards and avoids delays. Listings that don't meet these terms may be rejected.",
+      description:"Before you can proceed with your listing, please make sure to review all required preconditions. Accepting these is mandatory to continue. It ensures your submission meets our platformstandards and avoids delays. Listings that don't meet these terms may be rejected. Take a moment to go through them carefully before moving ahead. Once accepted, you'll be able to start listing right away.",
       status: "pending",
     }),
     []
@@ -60,13 +107,16 @@ export default function WebsiteFormApp() {
       offerType: existingWebsite?.offerType || "normal",
       guestPosting: existingWebsite?.guestPosting || { currency: "USD" },
       linkInsertion: existingWebsite?.linkInsertion || { currency: "USD" },
-      cryptoPrice: existingWebsite?.cryptoPrice || {},
-      adultPrice: existingWebsite?.adultPrice || {},
-      gamblingPrice: existingWebsite?.gamblingPrice || {},
-      homepageLink: existingWebsite?.homepageLink || {},
+      cryptoPrice: existingWebsite?.cryptoPrice || { currency: "USD" },
+      adultPrice: existingWebsite?.adultPrice || { currency: "USD" },
+      gamblingPrice: existingWebsite?.gamblingPrice || { currency: "USD" },
+      cryptoPrice2: existingWebsite?.cryptoPrice2 || { currency: "USD" },
+      adultPrice2: existingWebsite?.adultPrice2 || { currency: "USD" },
+      gamblingPrice2: existingWebsite?.gamblingPrice2 || { currency: "USD" },
+      homepageLink: existingWebsite?.homepageLink || { currency: "USD" },
       offerGuidelines: existingWebsite?.offerGuidelines || "",
       samePrice: existingWebsite?.samePrice || "no",
-      samePriceValue: existingWebsite?.samePriceValue || 0,
+      samePriceValue: existingWebsite?.samePriceValue,
       articleSpecification: existingWebsite?.articleSpecification || {
         includeArticle: false,
         clientProvidesContent: false,
@@ -94,10 +144,6 @@ export default function WebsiteFormApp() {
     [existingWebsite]
   );
 
-  const getStorageKey = useCallback(() => {
-    return id ? `websiteFormDraft_edit_${id}` : "websiteFormDraft_new";
-  }, [id]);
-
   const form = useForm<WebsiteFormData>({
     resolver: zodResolver(websiteFormSchema),
     defaultValues: defaultFormValues,
@@ -105,52 +151,91 @@ export default function WebsiteFormApp() {
     criteriaMode: "all",
   });
 
-  useEffect(() => {
-    const storageKey = getStorageKey();
-    const savedData = localStorage.getItem(storageKey);
-    const savedPreconditionKey = `${storageKey}_precondition`;
-    const savedPreconditionStatus = localStorage.getItem(savedPreconditionKey);
+  const cleanupOldStorage = useCallback(() => {
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (
+          key.startsWith("websiteFormDraft_edit_") || 
+          key.startsWith("websiteFormDraft_new") ||
+          key.includes("_precondition")
+        )) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+    } catch (error) {
+      console.error("Error cleaning up localStorage:", error);
+    }
+  }, []);
 
-    if (savedData) {
+  useEffect(() => {
+    cleanupOldStorage();
+
+    if (!id) {
       try {
-        const parsedData = JSON.parse(savedData);
-        form.reset({ ...defaultFormValues, ...parsedData });
+        const savedData = localStorage.getItem(STORAGE_KEYS.FORM_DATA);
+        const savedPrecondition = localStorage.getItem(STORAGE_KEYS.PRECONDITION);
+
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          const mergedData = mergeFormData(defaultFormValues, parsedData);
+          
+          form.reset(mergedData);
+          
+          setTimeout(() => {
+            form.trigger();
+          }, 100);
+
+          console.log("Loaded form data from localStorage:", mergedData);
+        } else {
+          form.reset(defaultFormValues);
+        }
+
+        if (savedPrecondition === "accepted") {
+          setPreconditionStep(prev => ({ ...prev, status: "accepted" }));
+        }
       } catch (error) {
-        console.error("Error parsing saved form data:", error);
+        console.error("Error loading saved form data:", error);
         form.reset(defaultFormValues);
       }
     } else {
       form.reset(defaultFormValues);
-    }
-
-    if (savedPreconditionStatus === "accepted") {
       setPreconditionStep(prev => ({ ...prev, status: "accepted" }));
     }
 
     setIsFormInitialized(true);
-  }, [form, defaultFormValues, getStorageKey]);
+  }, [form, defaultFormValues, cleanupOldStorage, id]);
 
   useEffect(() => {
-    if (!isFormInitialized) return;
+    if (!isFormInitialized || id) return; 
 
     const subscription = form.watch((value) => {
-      const storageKey = getStorageKey();
       try {
-        const hasData = Object.values(value).some(val => {
+        const hasData = Object.entries(value).some(([key, val]) => {
+          if (key === 'articleSpecification') return false; 
+          
           if (typeof val === 'string') return val.trim() !== '';
           if (typeof val === 'boolean') return val;
-          if (typeof val === 'number') return val !== 0;
+          if (typeof val === 'number') return val !== 0 && !isNaN(val);
           if (Array.isArray(val)) return val.length > 0;
           if (typeof val === 'object' && val !== null) {
             return Object.values(val).some(nestedVal => 
-              nestedVal !== null && nestedVal !== undefined && nestedVal !== '' && nestedVal !== 0
+              nestedVal !== null && 
+              nestedVal !== undefined && 
+              nestedVal !== '' && 
+              nestedVal !== 0 && 
+              !isNaN(nestedVal as number)
             );
           }
           return false;
         });
 
         if (hasData) {
-          localStorage.setItem(storageKey, JSON.stringify(value));
+          const cleanedValue = cleanFormDataForStorage(value);
+          localStorage.setItem(STORAGE_KEYS.FORM_DATA, JSON.stringify(cleanedValue));
+          console.log("Saved form data to localStorage:", cleanedValue);
         }
       } catch (error) {
         console.error("Error saving form data:", error);
@@ -158,24 +243,29 @@ export default function WebsiteFormApp() {
     });
 
     return () => subscription.unsubscribe();
-  }, [form, isFormInitialized, getStorageKey]);
+  }, [form, isFormInitialized, id]);
 
   useEffect(() => {
-    if (!isFormInitialized) return;
+    if (!isFormInitialized || id) return;
 
-    const storageKey = getStorageKey();
-    const preconditionKey = `${storageKey}_precondition`;
-    localStorage.setItem(preconditionKey, preconditionStep.status);
-  }, [preconditionStep.status, isFormInitialized, getStorageKey]);
+    try {
+      localStorage.setItem(STORAGE_KEYS.PRECONDITION, preconditionStep.status);
+    } catch (error) {
+      console.error("Error saving precondition status:", error);
+    }
+  }, [preconditionStep.status, isFormInitialized, id]);
 
   const clearFormData = useCallback(() => {
-    const storageKey = getStorageKey();
-    const preconditionKey = `${storageKey}_precondition`;
-
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(preconditionKey);
-    localStorage.removeItem("websiteFormDraft");
-  }, [getStorageKey]);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.FORM_DATA);
+      localStorage.removeItem(STORAGE_KEYS.PRECONDITION);
+      // Clean up any remaining old entries
+      cleanupOldStorage();
+      console.log("Cleared form data from localStorage");
+    } catch (error) {
+      console.error("Error clearing form data:", error);
+    }
+  }, [cleanupOldStorage]);
 
   const onSubmit: SubmitHandler<WebsiteFormData> = useCallback(
     async (data) => {

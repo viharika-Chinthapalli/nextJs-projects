@@ -1,7 +1,18 @@
 "use client";
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import Image from "next/image";
-import { UseFormReturn, FieldPath, FieldError, useFormState } from "react-hook-form";
+import {
+  UseFormReturn,
+  FieldPath,
+  FieldError,
+  useFormState,
+} from "react-hook-form";
 import dollarIcon from "../../../../public/add-website-icons/dollar-icon.svg";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,12 +30,36 @@ interface WebsiteFormData {
   offerType: "normal" | "grey-niche" | "homepage-link";
   guestPosting: { price?: number; currency: string };
   linkInsertion: { price?: number; currency: string };
-  cryptoPrice?: { guestPosting?: number; linkInsertion?: number; currency?: string };
-  adultPrice?: { guestPosting?: number; linkInsertion?: number; currency?: string };
-  gamblingPrice?: { guestPosting?: number; linkInsertion?: number; currency?: string };
-  cryptoPrice2?: { guestPosting?: number; linkInsertion?: number; currency?: string };
-  adultPrice2?: { guestPosting?: number; linkInsertion?: number; currency?: string };
-  gamblingPrice2?: { guestPosting?: number; linkInsertion?: number; currency?: string };
+  cryptoPrice?: {
+    guestPosting?: number;
+    linkInsertion?: number;
+    currency?: string;
+  };
+  adultPrice?: {
+    guestPosting?: number;
+    linkInsertion?: number;
+    currency?: string;
+  };
+  gamblingPrice?: {
+    guestPosting?: number;
+    linkInsertion?: number;
+    currency?: string;
+  };
+  cryptoPrice2?: {
+    guestPosting?: number;
+    linkInsertion?: number;
+    currency?: string;
+  };
+  adultPrice2?: {
+    guestPosting?: number;
+    linkInsertion?: number;
+    currency?: string;
+  };
+  gamblingPrice2?: {
+    guestPosting?: number;
+    linkInsertion?: number;
+    currency?: string;
+  };
   homepageLink?: { price?: number; currency?: string };
   offerGuidelines?: string;
   samePrice?: "yes" | "no";
@@ -33,8 +68,16 @@ interface WebsiteFormData {
     includeArticle: boolean;
     clientProvidesContent: boolean;
     wordCount?: { min?: number; max?: number };
-    taggingPolicy: "no-tag" | "advertiser-request" | "always-tag" | "exact-match";
-    linksToAdvertiser: { noTagged: boolean; minNumber?: number; maxNumber?: number };
+    taggingPolicy:
+      | "no-tag"
+      | "advertiser-request"
+      | "always-tag"
+      | "exact-match";
+    linksToAdvertiser: {
+      noTagged: boolean;
+      minNumber?: number;
+      maxNumber?: number;
+    };
     allowDoFollow: boolean;
     linkTypes: {
       brandedLinks: boolean;
@@ -98,7 +141,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
       <Label
         fontSize={14}
         fontWeight={500}
-        textColor={disabled ? "custom" : "muted"}
+        textColor={disabled ? "custom" : "default"}
         customColor={disabled ? "#0F0C1B66" : undefined}
       >
         {label}
@@ -107,8 +150,8 @@ const PriceInput: React.FC<PriceInputProps> = ({
         <div className="absolute left-3 sm:left-4.5 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
           <Image
             src={dollarIcon}
-            width={14}
-            height={14}
+            width={12}
+            height={12}
             alt="dollarIcon"
             style={{
               opacity: disabled ? 0.6 : 1,
@@ -127,7 +170,8 @@ const PriceInput: React.FC<PriceInputProps> = ({
           placeholder={placeholder}
           {...register(name, {
             setValueAs: (value: string | number | null | undefined) => {
-              if (value === "" || value === null || value === undefined) return undefined;
+              if (value === "" || value === null || value === undefined)
+                return undefined;
               const num = Number(value);
               return isNaN(num) ? undefined : num;
             },
@@ -138,8 +182,13 @@ const PriceInput: React.FC<PriceInputProps> = ({
           }`}
           style={{
             boxShadow: "none",
-            color: disabled ? "#0F0C1B66" : "#0F0C1B",
-            borderColor: fieldError ? "#FF4D4F" : disabled ? "#E5E5E5" : "#EAEAEA",
+            color: "#0F0C1B66",
+            opacity: disabled ? 0.6 : 1,
+            borderColor: fieldError
+              ? "#FF4D4F"
+              : disabled
+              ? "#E5E5E5"
+              : "#EAEAEA",
             borderWidth: "1px",
             borderStyle: "solid",
           }}
@@ -148,7 +197,9 @@ const PriceInput: React.FC<PriceInputProps> = ({
           min="0"
           step="0.01"
         />
-        {fieldError && <p className="text-xs text-red-500 mt-1">{fieldError.message}</p>}
+        {fieldError && (
+          <p className="text-xs text-red-500 mt-1">{fieldError.message}</p>
+        )}
       </div>
     </div>
   );
@@ -156,17 +207,103 @@ const PriceInput: React.FC<PriceInputProps> = ({
 
 PriceInput.displayName = "PriceInput";
 
+const SamePriceInput = React.memo<{
+  placeholder?: string;
+  disabled?: boolean;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}>(({ placeholder = "", disabled = false, value, onChange, inputRef }) => {
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      if (!disabled) {
+        e.target.style.boxShadow = "0px 0px 0px 2px #613FDD20";
+      }
+    },
+    [disabled]
+  );
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      e.target.style.boxShadow = "none";
+    },
+    []
+  );
+
+  return (
+    <div className="space-y-2">
+      <Label fontWeight={500} fontSize={14}>
+        Enter Price
+      </Label>
+      <div className="relative">
+        <div className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+          <Image src={dollarIcon} width={10} height={10} alt="dollarIcon" />
+        </div>
+        <div className="absolute left-6 sm:left-6 top-1/2 transform -translate-y-1/2 h-4 w-px bg-[#EAEAEA] pointer-events-none"></div>
+        <input
+          ref={inputRef}
+          type="number"
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          className={`
+            w-full
+            pl-8 sm:pl-10
+            pr-3
+            py-2
+            rounded-md
+            bg-white
+            text-[#0F0C1B66]
+            placeholder-[#0F0C1B66]
+            focus:outline-none
+            transition-shadow
+            border border-[#EAEAEA]
+            text-sm sm:text-base
+            min-h-[44px]
+            ${disabled ? "bg-gray-50 text-gray-400 cursor-not-allowed" : ""}
+          `}
+          style={{
+            boxShadow: "none",
+          }}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          min="0"
+          step="0.01"
+        />
+      </div>
+    </div>
+  );
+});
+
+SamePriceInput.displayName = "SamePriceInput";
+
 const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
   const {
     setValue,
+    watch,
+    trigger,
     formState: { errors },
   } = form;
 
-  const [activeTab, setActiveTab] = useState<"normal" | "grey-niche" | "homepage-link">("normal");
+  const [activeTab, setActiveTab] = useState<
+    "normal" | "grey-niche" | "homepage-link"
+  >("normal");
 
-  const samePrice = form.watch("samePrice") || "no";
-  const samePriceValue = form.watch("samePriceValue");
-  const offerGuidelines = form.watch("offerGuidelines") || "";
+  const [localSamePriceValue, setLocalSamePriceValue] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const samePrice = watch("samePrice") || "no";
+  const samePriceValue = watch("samePriceValue");
+  const offerGuidelines = watch("offerGuidelines") || "";
+
+  useEffect(() => {
+    if (samePriceValue !== undefined) {
+      setLocalSamePriceValue(samePriceValue.toString());
+    } else {
+      setLocalSamePriceValue("");
+    }
+  }, [samePriceValue]);
 
   useEffect(() => {
     setValue("offerType", activeTab);
@@ -175,61 +312,98 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
   const handleSamePriceToggle = useCallback(
     (checked: boolean) => {
       const newValue = checked ? "yes" : "no";
-      setValue("samePrice", newValue);
-      if (newValue === "no") setValue("samePriceValue", undefined);
-    },
-    [setValue]
-  );
-
-  const handleSamePriceValueChange = useCallback(
-    (value: string) => {
-      const num = Number(value);
-      const valid = value === "" || isNaN(num) ? undefined : num;
-      setValue("samePriceValue", valid);
-
-      if (samePrice === "yes" && valid !== undefined && valid >= 0) {
-        const priceFields: (keyof WebsiteFormData)[] = [
-          "cryptoPrice",
-          "adultPrice",
-          "gamblingPrice",
-          "cryptoPrice2",
-          "adultPrice2",
-          "gamblingPrice2",
-        ];
-
-        priceFields.forEach((field) => {
-          setValue(`${field}.guestPosting` as FieldPath<WebsiteFormData>, valid);
-          setValue(`${field}.linkInsertion` as FieldPath<WebsiteFormData>, valid);
-        });
+      setValue("samePrice", newValue, { shouldValidate: true, shouldDirty: true });
+      if (newValue === "no") {
+        setValue("samePriceValue", undefined, { shouldValidate: true, shouldDirty: true });
+        setLocalSamePriceValue("");
       }
     },
-    [samePrice, setValue]
+    [setValue]
   );
 
-  const handleOfferGuidelinesChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setValue("offerGuidelines", e.target.value, { shouldValidate: true, shouldDirty: true });
+  const priceFields = useMemo(() => [
+    {
+      guestPostingPath: "cryptoPrice.guestPosting" as FieldPath<WebsiteFormData>,
+      linkInsertionPath: "cryptoPrice.linkInsertion" as FieldPath<WebsiteFormData>,
     },
-    [setValue]
+    {
+      guestPostingPath: "adultPrice.guestPosting" as FieldPath<WebsiteFormData>,
+      linkInsertionPath: "adultPrice.linkInsertion" as FieldPath<WebsiteFormData>,
+    },
+    {
+      guestPostingPath: "gamblingPrice.guestPosting" as FieldPath<WebsiteFormData>,
+      linkInsertionPath: "gamblingPrice.linkInsertion" as FieldPath<WebsiteFormData>,
+    },
+    {
+      guestPostingPath: "cryptoPrice2.guestPosting" as FieldPath<WebsiteFormData>,
+      linkInsertionPath: "cryptoPrice2.linkInsertion" as FieldPath<WebsiteFormData>,
+    },
+    {
+      guestPostingPath: "adultPrice2.guestPosting" as FieldPath<WebsiteFormData>,
+      linkInsertionPath: "adultPrice2.linkInsertion" as FieldPath<WebsiteFormData>,
+    },
+    {
+      guestPostingPath: "gamblingPrice2.guestPosting" as FieldPath<WebsiteFormData>,
+      linkInsertionPath: "gamblingPrice2.linkInsertion" as FieldPath<WebsiteFormData>,
+    },
+  ], []);
+
+  const updateFormValuesRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSamePriceValueChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setLocalSamePriceValue(value);
+
+      if (updateFormValuesRef.current) {
+        clearTimeout(updateFormValuesRef.current);
+      }
+
+      updateFormValuesRef.current = setTimeout(() => {
+        const num = value === "" ? undefined : Number(value);
+        const validNum = value === "" || isNaN(num as number) ? undefined : num;
+
+        setValue("samePriceValue", validNum, { 
+          shouldValidate: true, 
+          shouldDirty: true 
+        });
+
+        if (samePrice === "yes" && validNum !== undefined && validNum >= 0) {
+          priceFields.forEach(({ guestPostingPath, linkInsertionPath }) => {
+            setValue(guestPostingPath, validNum, { 
+              shouldValidate: true, 
+              shouldDirty: true 
+            });
+            setValue(linkInsertionPath, validNum, { 
+              shouldValidate: true, 
+              shouldDirty: true 
+            });
+          });
+        }
+
+        trigger();
+      }, 100);
+    },
+    [samePrice, setValue, priceFields, trigger]
   );
 
   useEffect(() => {
-    if (samePrice === "yes" && samePriceValue !== undefined && samePriceValue > 0) {
-      const priceFields: (keyof WebsiteFormData)[] = [
-        "cryptoPrice",
-        "adultPrice",
-        "gamblingPrice",
-        "cryptoPrice2",
-        "adultPrice2",
-        "gamblingPrice2",
-      ];
+    return () => {
+      if (updateFormValuesRef.current) {
+        clearTimeout(updateFormValuesRef.current);
+      }
+    };
+  }, []);
 
-      priceFields.forEach((field) => {
-        setValue(`${field}.guestPosting` as FieldPath<WebsiteFormData>, samePriceValue);
-        setValue(`${field}.linkInsertion` as FieldPath<WebsiteFormData>, samePriceValue);
+  const handleOfferGuidelinesChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setValue("offerGuidelines", e.target.value, {
+        shouldValidate: true,
+        shouldDirty: true,
       });
-    }
-  }, [samePrice, samePriceValue, setValue]);
+    },
+    [setValue]
+  );
 
   const tabs = useMemo(
     () => [
@@ -240,80 +414,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
     []
   );
 
-  interface SamePriceInputProps {
-    placeholder?: string;
-    disabled?: boolean;
-    value: number | undefined;
-    onChange: (value: string) => void;
-  }
-
-  const SamePriceInput: React.FC<SamePriceInputProps> = React.memo(
-    ({ placeholder = "", disabled = false, value, onChange }) => {
-      const handleFocus = useCallback(
-        (e: React.FocusEvent<HTMLInputElement>) => {
-          if (!disabled) {
-            e.target.style.boxShadow = "0px 0px 0px 2px #613FDD20";
-          }
-        },
-        [disabled]
-      );
-
-      const handleBlur = useCallback(
-        (e: React.FocusEvent<HTMLInputElement>) => {
-          e.target.style.boxShadow = "none";
-        },
-        []
-      );
-
-      return (
-        <div className="space-y-2">
-          <Label fontWeight={500} fontSize={14}>
-            Enter Price
-          </Label>
-          <div className="relative">
-            <div className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-              <Image src={dollarIcon} width={12} height={12} alt="dollarIcon" />
-            </div>
-            <div className="absolute left-6 sm:left-6 top-1/2 transform -translate-y-1/2 h-4 w-px bg-[#EAEAEA] pointer-events-none"></div>
-            <input
-              type="number"
-              placeholder={placeholder}
-              value={value !== undefined ? value : ""}
-              onChange={(e) => onChange(e.target.value)}
-              disabled={disabled}
-              className={`
-              w-full
-              pl-8 sm:pl-10
-              pr-3
-              py-2
-              rounded-md
-              bg-white
-              text-[#0F0C1B66]
-              placeholder-[#0F0C1B66]
-              focus:outline-none
-              transition-shadow
-              border border-[#EAEAEA]
-              text-sm sm:text-base
-              min-h-[44px]
-              ${disabled ? "bg-gray-50 text-gray-400 cursor-not-allowed" : ""}
-            `}
-              style={{
-                boxShadow: "none",
-              }}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              min="0"
-              step="0.01"
-            />
-          </div>
-        </div>
-      );
-    }
-  );
-
-  SamePriceInput.displayName = "SamePriceInput";
-
-  const renderGreyNicheSection = (
+  const renderGreyNicheSection = useCallback((
     title: string,
     cryptoPricePrefix: FieldPath<WebsiteFormData>,
     adultPricePrefix: FieldPath<WebsiteFormData>,
@@ -334,14 +435,18 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
           <div className="space-y-3 sm:space-y-4">
             <PriceInput
               label="Price for Guest Posting"
-              name={`${gamblingPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>}
+              name={
+                `${gamblingPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>
+              }
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
             />
             <PriceInput
               label="Price for Link Insertion"
-              name={`${gamblingPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>}
+              name={
+                `${gamblingPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>
+              }
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
@@ -362,14 +467,18 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
           <div className="space-y-3 sm:space-y-4">
             <PriceInput
               label="Price for Guest Posting"
-              name={`${cryptoPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>}
+              name={
+                `${cryptoPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>
+              }
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
             />
             <PriceInput
               label="Price for Link Insertion"
-              name={`${cryptoPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>}
+              name={
+                `${cryptoPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>
+              }
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
@@ -390,14 +499,18 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
           <div className="space-y-3 sm:space-y-4">
             <PriceInput
               label="Price for Guest Posting"
-              name={`${adultPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>}
+              name={
+                `${adultPricePrefix}.guestPosting` as FieldPath<WebsiteFormData>
+              }
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
             />
             <PriceInput
               label="Price for Link Insertion"
-              name={`${adultPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>}
+              name={
+                `${adultPricePrefix}.linkInsertion` as FieldPath<WebsiteFormData>
+              }
               placeholder="0"
               disabled={samePrice === "yes"}
               form={form}
@@ -406,7 +519,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
         </div>
       </div>
     </div>
-  );
+  ), [samePrice, form]);
 
   return (
     <>
@@ -462,8 +575,8 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
 
           {activeTab === "grey-niche" && (
             <div className="space-y-6 sm:space-y-8">
-              <div className="bg-white rounded-lg p-4 sm:p-6">
-                <div className="mb-4 sm:mb-6">
+              <div className="bg-white rounded-lg">
+                <div className="">
                   <div className="flex items-center space-x-3">
                     <button
                       type="button"
@@ -496,17 +609,18 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
                 </div>
 
                 {samePrice === "yes" && (
-                  <div className="mb-6 sm:mb-8 w-full max-w-xs">
+                  <div className="mt-6 mb-6 sm:mb-8 w-full max-w-xs">
                     <SamePriceInput
-                      value={samePriceValue}
+                      value={localSamePriceValue}
                       onChange={handleSamePriceValueChange}
                       placeholder=""
+                      inputRef={inputRef}
                     />
                   </div>
                 )}
               </div>
 
-              <div className="bg-white rounded-lg p-4 sm:p-6">
+              <div className="bg-white rounded-lg">
                 {renderGreyNicheSection(
                   "First Row",
                   "cryptoPrice" as FieldPath<WebsiteFormData>,
@@ -515,7 +629,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
                 )}
               </div>
 
-              <div className="bg-white rounded-lg p-4 sm:p-6">
+              <div className="bg-white rounded-lg">
                 {renderGreyNicheSection(
                   "Second Row",
                   "cryptoPrice2" as FieldPath<WebsiteFormData>,
@@ -539,7 +653,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
 
                   <div className="space-y-2">
                     <Label fontSize={14} fontWeight={500}>
-                      Offer Guidelines (Optional)
+                      Offer Guidelines
                     </Label>
                     <Textarea
                       placeholder="Description"

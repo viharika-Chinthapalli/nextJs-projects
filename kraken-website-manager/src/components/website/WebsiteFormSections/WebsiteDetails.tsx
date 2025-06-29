@@ -45,10 +45,10 @@ export function WebsiteDetails({ form }: WebsiteDetailsProps) {
     const currentCountry = getValues("trafficCountry");
 
     if (!currentLanguage && LANGUAGES.length > 0) {
-      setValue("primaryLanguage", LANGUAGES[0].value);
+      setValue("primaryLanguage", LANGUAGES[0].value, { shouldDirty: false });
     }
     if (!currentCountry && COUNTRIES.length > 0) {
-      setValue("trafficCountry", COUNTRIES[0].value);
+      setValue("trafficCountry", COUNTRIES[0].value, { shouldDirty: false });
     }
   }, [setValue, getValues]);
 
@@ -132,6 +132,21 @@ export function WebsiteDetails({ form }: WebsiteDetailsProps) {
     [updateField]
   );
 
+  const handleUrlChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      updateField("url", value);
+    },
+    [updateField]
+  );
+
+  const handleOwnerChange = useCallback(
+    (checked: boolean) => {
+      updateField("isOwner", checked);
+    },
+    [updateField]
+  );
+
   return (
     <>
       <Label fontWeight={600} fontSize={24} className="mt-20">
@@ -153,10 +168,12 @@ export function WebsiteDetails({ form }: WebsiteDetailsProps) {
                     message: "Please enter a valid URL"
                   }
                 })}
+                value={formData.url || ""}
+                onChange={handleUrlChange}
                 placeholder="Website URL"
                 fontSize="14px"
                 fontWeight="500"
-                fontColor="#0F0C1B"
+                fontColor="#0F0C1B99"
                 placeholderColor="#0F0C1B66"
                 placeholderSize="14px"
                 placeholderWeight="500"
@@ -320,9 +337,8 @@ export function WebsiteDetails({ form }: WebsiteDetailsProps) {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="isOwner"
-              {...register("isOwner")}
               checked={formData.isOwner || false}
-              onCheckedChange={(checked) => updateField("isOwner", !!checked)}
+              onCheckedChange={handleOwnerChange}
             />
             <Label fontWeight={500} fontSize={14}>
               I am the owner of the website

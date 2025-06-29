@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useCallback, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -45,7 +44,6 @@ const greyNicheLabels = [
   "Finance",
 ];
 
-// Type definitions
 interface Website {
   id: string;
   url: string;
@@ -82,7 +80,7 @@ const CountryFlag = React.memo<{ country: string }>(({ country }) => (
   <div className="flex items-center gap-2">
     <Image
       src={getCountryFlagUrl(country)}
-      alt="" 
+      alt=""
       width={21}
       height={14}
       className="object-cover flex-shrink-0"
@@ -93,7 +91,7 @@ const CountryFlag = React.memo<{ country: string }>(({ country }) => (
     </Label>
   </div>
 ));
-CountryFlag.displayName = 'CountryFlag';
+CountryFlag.displayName = "CountryFlag";
 
 const GreyNichesIcons = React.memo<{ showAll?: boolean }>(
   ({ showAll = false }) => (
@@ -120,35 +118,7 @@ const GreyNichesIcons = React.memo<{ showAll?: boolean }>(
     </div>
   )
 );
-GreyNichesIcons.displayName = 'GreyNichesIcons';
-
-const AddWebsiteButton = React.memo(() => (
-  <Link href="/add-website">
-    <Button className={STYLES.button}>
-      <Plus className="w-4 h-4 mr-2" />
-      Add website
-    </Button>
-  </Link>
-));
-AddWebsiteButton.displayName = 'AddWebsiteButton';
-
-const EmptyState = React.memo(() => (
-  <div className="text-center py-8 sm:py-12 px-4">
-    <div className="mx-auto max-w-md">
-      <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-        <Plus className="h-6 w-6 text-gray-400" />
-      </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">
-        No websites yet
-      </h3>
-      <p className="text-gray-500 mb-6">
-        Get started by adding your first website to the marketplace.
-      </p>
-      <AddWebsiteButton />
-    </div>
-  </div>
-));
-EmptyState.displayName = 'EmptyState';
+GreyNichesIcons.displayName = "GreyNichesIcons";
 
 const getLanguageLabel = (languageCode: string) => {
   const language = LANGUAGES.find((lang) => lang.value === languageCode);
@@ -233,6 +203,11 @@ export function WebsiteTable() {
     },
     [router]
   );
+
+  const goToAddWebsite = useCallback(() => {
+    setIsNavigating(true);
+    router.push("/add-website");
+  }, [router]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -330,15 +305,37 @@ export function WebsiteTable() {
     return items;
   }, [pagination, handlePageChange, getVisiblePages]);
 
+  const AddWebsiteButton = React.memo(() => (
+    <Button className={STYLES.button} onClick={goToAddWebsite}>
+      <Plus className="w-4 h-4 mr-2" />
+      Add website
+    </Button>
+  ));
+  AddWebsiteButton.displayName = "AddWebsiteButton";
+
+  const EmptyState = React.memo(() => (
+    <div className="text-center py-8 sm:py-12 px-4">
+      <div className="mx-auto max-w-md">
+        <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <Plus className="h-6 w-6 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          No websites yet
+        </h3>
+        <p className="text-gray-500 mb-6">
+          Get started by adding your first website to the marketplace.
+        </p>
+        <AddWebsiteButton />
+      </div>
+    </div>
+  ));
+  EmptyState.displayName = "EmptyState";
+
   const MobileFieldRenderer = React.memo<{
     label: string;
     children: React.ReactNode;
     className?: string;
-  }>(({
-    label,
-    children,
-    className = "",
-  }) => (
+  }>(({ label, children, className = "" }) => (
     <div className={className}>
       <Label fontSize={12} fontWeight={600} textColor="muted">
         {label}
@@ -346,7 +343,7 @@ export function WebsiteTable() {
       <div className="mt-1">{children}</div>
     </div>
   ));
-  MobileFieldRenderer.displayName = 'MobileFieldRenderer';
+  MobileFieldRenderer.displayName = "MobileFieldRenderer";
 
   const MobileCard = React.memo<{
     website: Website;
@@ -415,12 +412,15 @@ export function WebsiteTable() {
       </div>
     </div>
   ));
-  MobileCard.displayName = 'MobileCard';
+  MobileCard.displayName = "MobileCard";
 
   if (isNavigating) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
-        <LoadingSpinner size="lg" />
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-[9999]">
+        <div className="p-8 rounded-lg">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-center text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }

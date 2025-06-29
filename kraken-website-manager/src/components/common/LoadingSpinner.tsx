@@ -13,10 +13,12 @@ export const LoadingSpinner: React.FC<{
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div
-        className={`animate-spin rounded-full border-t-4 border-secondary border-opacity-100 ${sizeStyles[size]}`}
+        className={`animate-spin rounded-full border-gray-200 border-t-secondary ${sizeStyles[size]}`}
         role="status"
         aria-label="Loading"
-      />
+      >
+        <span className="sr-only">Loading...</span>
+      </div>
     </div>
   );
 };

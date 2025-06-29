@@ -97,6 +97,7 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
     );
   };
 
+
   useEffect(() => {
     if (shouldShowWordCount) {
       if (wordCountMin === undefined || wordCountMax === undefined) {
@@ -113,12 +114,8 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
           });
         }
       } else {
-        if (wordCountMin !== undefined) {
-          clearErrors("articleSpecification.wordCount.min");
-        }
-        if (wordCountMax !== undefined) {
-          clearErrors("articleSpecification.wordCount.max");
-        }
+        clearErrors("articleSpecification.wordCount.min");
+        clearErrors("articleSpecification.wordCount.max");
 
         if (wordCountMax <= wordCountMin) {
           setError("articleSpecification.wordCount.max", {
@@ -155,12 +152,8 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
           });
         }
       } else {
-        if (linksMin !== undefined) {
-          clearErrors("articleSpecification.linksToAdvertiser.minNumber");
-        }
-        if (linksMax !== undefined) {
-          clearErrors("articleSpecification.linksToAdvertiser.maxNumber");
-        }
+        clearErrors("articleSpecification.linksToAdvertiser.minNumber");
+        clearErrors("articleSpecification.linksToAdvertiser.maxNumber");
 
         if (linksMax <= linksMin) {
           setError("articleSpecification.linksToAdvertiser.maxNumber", {
@@ -184,36 +177,42 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
 
   const handleWordCountChange = (field: "min" | "max", value: string) => {
     const numValue = value === "" ? undefined : Number(value);
+    
     clearErrors("articleSpecification.wordCount");
+    
     setValue(
       `articleSpecification.wordCount.${field}` as
         | "articleSpecification.wordCount.min"
         | "articleSpecification.wordCount.max",
       numValue
     );
+    
     setTimeout(() => {
       trigger([
         "articleSpecification.wordCount.min",
         "articleSpecification.wordCount.max",
       ]);
-    }, 0);
+    }, 100);
   };
 
   const handleLinkCountChange = (field: "min" | "max", value: string) => {
     const numValue = value === "" ? undefined : Number(value);
+    
     clearErrors("articleSpecification.linksToAdvertiser");
+    
     setValue(
       `articleSpecification.linksToAdvertiser.${field}Number` as
         | "articleSpecification.linksToAdvertiser.minNumber"
         | "articleSpecification.linksToAdvertiser.maxNumber",
       numValue
     );
+    
     setTimeout(() => {
       trigger([
         "articleSpecification.linksToAdvertiser.minNumber",
         "articleSpecification.linksToAdvertiser.maxNumber",
       ]);
-    }, 0);
+    }, 100);
   };
 
   const handleContentProvisionChange = (value: string) => {
@@ -228,13 +227,6 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
         "articleSpecification.wordCount.max",
         "articleSpecification.wordCount",
       ]);
-    } else {
-      setTimeout(() => {
-        trigger([
-          "articleSpecification.wordCount.min",
-          "articleSpecification.wordCount.max",
-        ]);
-      }, 100);
     }
   };
 
@@ -250,13 +242,6 @@ export function ArticleSpecification({ form }: ArticleSpecificationProps) {
         "articleSpecification.linksToAdvertiser.maxNumber",
         "articleSpecification.linksToAdvertiser",
       ]);
-    } else {
-      setTimeout(() => {
-        trigger([
-          "articleSpecification.linksToAdvertiser.minNumber",
-          "articleSpecification.linksToAdvertiser.maxNumber",
-        ]);
-      }, 100);
     }
   };
 
