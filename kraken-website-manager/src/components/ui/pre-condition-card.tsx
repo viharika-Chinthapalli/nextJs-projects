@@ -23,6 +23,32 @@ export function PreconditionCard({
   isExpanded,
   onToggle,
 }: PreconditionCardProps) {
+  const StatusBadge = () => (
+    <Label fontWeight={500} fontSize={13}>
+      <div
+        className="flex items-center gap-2 px-3 py-1 rounded-full"
+        style={{
+          backgroundColor:
+            step.status === "accepted"
+              ? "var(--color-green-primary)"
+              : "var(--color-orange-primary)",
+        }}
+      >
+        {step.status === "accepted" ? (
+          <>
+            <Check className="w-4 h-4 text-green-secondary" />
+            Accepted
+          </>
+        ) : (
+          <>
+            <div className="w-2 h-2 bg-orange-secondary rounded-full"></div>
+            Pending
+          </>
+        )}
+      </div>
+    </Label>
+  );
+
   return (
     <div className="bg-white border rounded-lg">
       <div
@@ -36,32 +62,7 @@ export function PreconditionCard({
         </div>
 
         <div className="flex items-center gap-2">
-          {!isExpanded && (
-            <Label fontWeight={500} fontSize={13}>
-              <div
-                className="flex items-center gap-2 px-3 py-1 rounded-full"
-                style={{
-                  backgroundColor:
-                    step.status === "accepted"
-                      ? "var(--color-green-primary)"
-                      : "var(--color-orange-primary",
-                }}
-              >
-                {step.status === "accepted" ? (
-                  <>
-                    <Check className="w-4 h-4 text-green-secondary" />
-                    Accepted
-                  </>
-                ) : (
-                  <>
-                    <div className="w-2 h-2 bg-orange-secondary rounded-full"></div>
-                    Pending
-                  </>
-                )}
-              </div>
-            </Label>
-          )}
-
+          {!isExpanded && <StatusBadge />}
           {isExpanded ? (
             <ChevronUp className="w-5 h-5 text-muted-foreground" />
           ) : (
@@ -73,7 +74,7 @@ export function PreconditionCard({
       {isExpanded && (
         <div className="px-4 pb-4">
           <Label
-            className=" mb-4"
+            className="mb-4"
             fontFamily="inter"
             fontWeight={400}
             fontSize={14}
@@ -82,8 +83,8 @@ export function PreconditionCard({
             <span style={{ lineHeight: "20px" }}>{step.description}</span>
           </Label>
 
-          {step.status === "pending" && (
-            <div className="flex justify-start">
+          <div className="flex justify-start">
+            {step.status === "pending" ? (
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -95,8 +96,10 @@ export function PreconditionCard({
               >
                 Accept
               </Button>
-            </div>
-          )}
+            ) : (
+              <StatusBadge />
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -35,37 +35,34 @@ const mergeFormData = (defaultData: WebsiteFormData, savedData: Partial<WebsiteF
   
   Object.keys(savedData).forEach(key => {
     const typedKey = key as keyof WebsiteFormData;
-    if (savedData[typedKey] !== undefined && savedData[typedKey] !== null) {
-      if (typeof defaultData[typedKey] === 'object' && !Array.isArray(defaultData[typedKey]) && defaultData[typedKey] !== null) {
-        (merged[typedKey] as any) = {
-          ...(defaultData[typedKey] as any),
-          ...(savedData[typedKey] as any)
+    const savedValue = savedData[typedKey];
+    
+    if (savedValue !== undefined && savedValue !== null) {
+      // Handle special price objects separately
+      if (['guestPosting', 'linkInsertion', 'homepageLink', 'cryptoPrice', 'adultPrice', 'gamblingPrice', 'cryptoPrice2', 'adultPrice2', 'gamblingPrice2'].includes(typedKey)) {
+        if (typeof savedValue === 'object' && typeof defaultData[typedKey] === 'object') {
+          // Use type assertion to handle the complex union types
+          (merged as Record<string, unknown>)[typedKey] = {
+            ...(defaultData[typedKey] as Record<string, unknown>),
+            ...(savedValue as Record<string, unknown>)
+          };
+        }
+      } else if (typeof defaultData[typedKey] === 'object' && !Array.isArray(defaultData[typedKey]) && defaultData[typedKey] !== null) {
+        (merged[typedKey] as Record<string, unknown>) = {
+          ...(defaultData[typedKey] as Record<string, unknown>),
+          ...(savedValue as Record<string, unknown>)
         };
       } else {
-        (merged[typedKey] as any) = savedData[typedKey];
+        // Direct assignment for primitive types
+        (merged as Record<string, unknown>)[typedKey] = savedValue;
       }
-    }
-  });
-
-  const priceObjects = [
-    'guestPosting', 'linkInsertion', 'homepageLink',
-    'cryptoPrice', 'adultPrice', 'gamblingPrice', 
-    'cryptoPrice2', 'adultPrice2', 'gamblingPrice2'
-  ] as const;
-
-  priceObjects.forEach(priceKey => {
-    if (savedData[priceKey]) {
-      merged[priceKey] = {
-        ...(defaultData[priceKey] as any),
-        ...(savedData[priceKey] as any)
-      };
     }
   });
 
   return merged;
 };
 
-const cleanFormDataForStorage = (data: any): any => {
+const cleanFormDataForStorage = (data: Partial<WebsiteFormData>): Record<string, unknown> => {
   return JSON.parse(JSON.stringify(data, (key, value) => {
     if (typeof value === 'function') return undefined;
     if (value === undefined) return null;
@@ -179,7 +176,7 @@ export default function WebsiteFormApp() {
         const savedPrecondition = localStorage.getItem(STORAGE_KEYS.PRECONDITION);
 
         if (savedData) {
-          const parsedData = JSON.parse(savedData);
+          const parsedData = JSON.parse(savedData) as Partial<WebsiteFormData>;
           const mergedData = mergeFormData(defaultFormValues, parsedData);
           
           form.reset(mergedData);
@@ -213,7 +210,15 @@ export default function WebsiteFormApp() {
 
     const subscription = form.watch((value) => {
       try {
-        const hasData = Object.entries(value).some(([key, val]) => {
+        // Filter out undefined values and create a clean partial object
+        const cleanValue: Partial<WebsiteFormData> = {};
+        Object.entries(value).forEach(([key, val]) => {
+          if (val !== undefined && val !== null) {
+            (cleanValue as Record<string, unknown>)[key] = val;
+          }
+        });
+
+        const hasData = Object.entries(cleanValue).some(([key, val]) => {
           if (key === 'articleSpecification') return false; 
           
           if (typeof val === 'string') return val.trim() !== '';
@@ -233,7 +238,7 @@ export default function WebsiteFormApp() {
         });
 
         if (hasData) {
-          const cleanedValue = cleanFormDataForStorage(value);
+          const cleanedValue = cleanFormDataForStorage(cleanValue);
           localStorage.setItem(STORAGE_KEYS.FORM_DATA, JSON.stringify(cleanedValue));
           console.log("Saved form data to localStorage:", cleanedValue);
         }
