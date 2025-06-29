@@ -236,10 +236,24 @@ const SamePriceInput = React.memo<{
         Enter Price
       </Label>
       <div className="relative">
-        <div className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-          <Image src={dollarIcon} width={10} height={10} alt="dollarIcon" />
+        <div className="absolute left-3 sm:left-4.5 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+          <Image 
+            src={dollarIcon} 
+            width={12} 
+            height={12} 
+            alt="dollarIcon"
+            style={{
+              opacity: disabled ? 0.6 : 1,
+              filter: disabled ? "grayscale(1)" : "none",
+            }}
+          />
         </div>
-        <div className="absolute left-6 sm:left-6 top-1/2 transform -translate-y-1/2 h-4 w-px bg-[#EAEAEA] pointer-events-none"></div>
+
+        <div
+          className="absolute left-8 sm:left-12 top-1/2 transform -translate-y-1/2 h-8 sm:h-10 w-px pointer-events-none"
+          style={{ backgroundColor: disabled ? "#E5E5E5" : "#EAEAEA" }}
+        ></div>
+
         <input
           ref={inputRef}
           type="number"
@@ -247,24 +261,16 @@ const SamePriceInput = React.memo<{
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className={`
-            w-full
-            pl-8 sm:pl-10
-            pr-3
-            py-2
-            rounded-md
-            bg-white
-            text-[#0F0C1B66]
-            placeholder-[#0F0C1B66]
-            focus:outline-none
-            transition-shadow
-            border border-[#EAEAEA]
-            text-sm sm:text-base
-            min-h-[44px]
-            ${disabled ? "bg-gray-50 text-gray-400 cursor-not-allowed" : ""}
-          `}
+          className={`w-full pl-10 sm:pl-14 pr-3 py-2 rounded-md bg-white focus:outline-none transition-shadow text-sm sm:text-base min-h-[44px] ${
+            disabled ? "bg-gray-50 cursor-not-allowed" : ""
+          }`}
           style={{
             boxShadow: "none",
+            color: "#0F0C1B66",
+            opacity: disabled ? 0.6 : 1,
+            borderColor: disabled ? "#E5E5E5" : "#EAEAEA",
+            borderWidth: "1px",
+            borderStyle: "solid",
           }}
           onFocus={handleFocus}
           onBlur={handleBlur}
@@ -275,7 +281,6 @@ const SamePriceInput = React.memo<{
     </div>
   );
 });
-
 SamePriceInput.displayName = "SamePriceInput";
 
 const CreateOffer: React.FC<CreateOfferProps> = ({ form }) => {
